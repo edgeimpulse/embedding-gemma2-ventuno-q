@@ -12,3 +12,9 @@ variables:
   - name: EI_PROJECT_ID
     description: Project ID. Leave empty to resolve it from the API key
     default_value: ""
+  - name: EI_STUDIO_HOST
+    description: Studio API host. Change only for an on-premise or regional deployment
+    default_value: https://studio.edgeimpulse.com
+  - name: EI_INGESTION_HOST
+    description: Ingestion API host. Change only for an on-premise or regional deployment
+    default_value: https://ingestion.edgeimpulse.com

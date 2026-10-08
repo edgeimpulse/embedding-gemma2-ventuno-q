@@ -59,10 +59,42 @@ docs/images/                  README screenshots
 
 ## Run on a board
 
-1. Copy `app/` to the board as an App Lab app (or open it in App Lab).
-2. Start it. The first boot downloads about 0.9 GB of GGUF weights from Hugging Face into the app's `data/` folder. Later starts work offline.
-3. Open the app UI. The status pill reads **Ready · 768-d** when the model is loaded.
-4. Connect Edge Impulse. Either paste a project API key in the UI (Studio > Dashboard > Keys) or set the `EI_API_KEY` secret on the Edge Impulse brick.
+The app is a standard App Lab app. Its two bricks live inside it (`app/bricks/`), so there is nothing else to install. You need a VENTUNO Q (or UNO Q class board) running a current App Lab image, with network access to Hugging Face for the first start.
+
+### Option A: App Lab
+
+1. Connect App Lab to the board.
+2. Put the `app/` folder in the board's `~/ArduinoApps/` folder (use the `scp` command below, or open the folder over Remote-SSH). The app appears in **My Apps** as *EmbeddingGemma 2 Vision Lab*.
+3. Open it and press **Run**.
+
+### Option B: command line
+
+From this repo on your computer, copy the app to the board. Replace `<board>` with its IP address or hostname.
+
+```bash
+ssh arduino@<board> mkdir -p ~/ArduinoApps/embedding-gemma2
+scp -r app/* arduino@<board>:~/ArduinoApps/embedding-gemma2/
+```
+
+Don't copy `.git` or other hidden folders into the app folder. They can break the start.
+
+Then on the board:
+
+```bash
+arduino-app-cli app start ~/ArduinoApps/embedding-gemma2     # build and run
+arduino-app-cli app logs  ~/ArduinoApps/embedding-gemma2 --follow
+arduino-app-cli app stop  ~/ArduinoApps/embedding-gemma2
+```
+
+To update after an edit, run `app stop`, copy the changed files again, and `app start`. `rsync -av --exclude data --exclude .cache app/ arduino@<board>:~/ArduinoApps/embedding-gemma2/` copies only what changed and keeps the downloaded weights (`data/`) and cache on the board.
+
+### First start
+
+1. The runner container downloads about 0.9 GB of GGUF weights from Hugging Face into the app's `data/` folder. This can take several minutes. Later starts work offline.
+2. Open the app UI. The status pill reads **Ready · 768-d** when the model is loaded.
+3. If the pill stays on a download message, check `app logs` and the runner container logs.
+
+The `data/` folder holds board state (weights and the project embedding cache). Empty it before you export or share the app, because the cache describes your Edge Impulse samples.
 
 ### Configuration
 
@@ -80,6 +112,30 @@ docs/images/                  README screenshots
 | `CAMERA_SOURCE` | first camera | Set to `none` to use image upload only |
 
 The runner image is `ghcr.io/ggml-org/llama.cpp:server-b11459`, pinned by digest. It is the first build that includes the `gemma-embedding2` architecture.
+
+## Use it with Edge Impulse
+
+The app works with any Edge Impulse **image classification** project. It reads and writes through the Studio and Ingestion APIs with a project API key.
+
+1. **Create a project** in [Edge Impulse Studio](https://studio.edgeimpulse.com/) (any image project works). Add a few labelled images or start empty and collect from the camera.
+2. **Get an API key:** open the project, go to **Dashboard > Keys**, and add a key. Copy it. Treat it like a password.
+3. **Connect the app**, using one of these:
+   - Paste the key into **Edge Impulse project > API key** in the UI. It is kept in memory only, so you paste it again after a restart.
+   - Or store it on the board: `arduino-app-cli app brick config ~/ArduinoApps/embedding-gemma2 edge_impulse EI_API_KEY` (prompts for the value, so it stays out of your shell history). Add `EI_PROJECT_ID=<id>` if the key covers more than one project.
+4. **Embed the project:** press **Embed project images**. It embeds every training and testing image once and caches the vectors.
+5. **Work the dataset:**
+   - **Upload current frame** adds a camera frame to `training` or `testing` with the label you pick (or the top prediction).
+   - **Find label issues** lists unlabelled samples and likely wrong labels. **Relabel** changes the label in Studio.
+   - **Use project as examples** switches classification to your labelled training images.
+   - **Search** finds images by text or by the camera frame.
+6. **Train the production model in Studio:** with the cleaned, grown dataset, create an impulse (Image + Transfer Learning), train, and check **Model testing**. Deploy it from **Deployment** (for example as a Linux EIM or Arduino library) to run a small, fast model on the board without the embedding model.
+
+Notes:
+
+- Use a test project first. **Upload** and **Relabel** change the project.
+- Upload and relabel need a key that can write to the project.
+- Using Edge Impulse Enterprise hosts or a regional deployment? Set `EI_STUDIO_HOST` and `EI_INGESTION_HOST` on the Edge Impulse brick.
+- Label names must match between the app and Studio. The app uses the label text from the project exactly as written.
 
 ## Run on a laptop
 
