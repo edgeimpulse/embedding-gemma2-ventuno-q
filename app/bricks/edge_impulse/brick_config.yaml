@@ -1,0 +1,14 @@
+id: edge_impulse
+name: Edge Impulse Project
+description: |
+  Connects the app to an Edge Impulse project with a project API key: list and download
+  image samples, change labels, and upload new images through the Ingestion API.
+category: ai
+variables:
+  - name: EI_API_KEY
+    description: Edge Impulse project API key (Dashboard > Keys). Can also be pasted in the app UI
+    default_value: ""
+    secret: true
+  - name: EI_PROJECT_ID
+    description: Project ID. Leave empty to resolve it from the API key
+    default_value: ""

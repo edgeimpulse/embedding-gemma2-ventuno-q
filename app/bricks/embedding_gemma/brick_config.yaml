@@ -1,0 +1,20 @@
+id: embedding_gemma
+name: EmbeddingGemma 2
+description: |
+  Multimodal embeddings (text and image) with Google EmbeddingGemma 2, served by a
+  llama.cpp container on the board CPU. Text and images map into one 768-d vector
+  space, for zero-shot classification, similarity search, and dataset curation.
+category: ai
+variables:
+  - name: EMBEDDING_GEMMA_HF_REPO
+    description: Hugging Face GGUF repo and quantization, downloaded once and cached in the app data folder
+    default_value: ggml-org/embeddinggemma-2-GGUF:Q8_0
+  - name: EMBEDDING_GEMMA_THREADS
+    description: CPU threads for llama.cpp (-1 lets llama.cpp choose)
+    default_value: "-1"
+  - name: EMBEDDING_GEMMA_IMAGE_MAX_TOKENS
+    description: Max vision tokens per image. Lower is faster, 70 was accurate in testing
+    default_value: "70"
+  - name: EMBEDDING_GEMMA_DIM
+    description: Output dimension (768, or Matryoshka 512/256/128)
+    default_value: "768"

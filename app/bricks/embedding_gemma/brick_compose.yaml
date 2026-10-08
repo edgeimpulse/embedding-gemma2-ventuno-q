@@ -1,0 +1,52 @@
+# EmbeddingGemma 2 runner: upstream llama.cpp server (CPU, arm64) with the text model and
+# its multimodal projector. The first start downloads the GGUF files from Hugging Face into
+# the app data folder, later starts are offline-capable from that cache.
+#
+# server-b11459 is the first llama.cpp server image that includes the gemma-embedding2
+# architecture (PR #30054). Pinned by digest so a retag can't change it.
+services:
+  embedding-gemma-runner:
+    image: ghcr.io/ggml-org/llama.cpp:server-b11459@sha256:33868c035b21dc63f7c60b7438774283fd99215bc319114eb03de5df4ce7cd6b
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+    volumes:
+      # The app folder, as the main container sees it. It exists and is owned by the app
+      # user (1000), which this service runs as, so llama.cpp can create data/models in
+      # it. data/ is board state: App Lab leaves it out of copies and releases, so the
+      # ~0.9 GB of weights are downloaded once per board and never shipped with the app.
+      # Not at /app: the image keeps llama-server and its libraries there.
+      - "${APP_HOME:-.}:/arduino-app"
+    environment:
+      LLAMA_CACHE: /arduino-app/data/models
+      LLAMA_ARG_HOST: 0.0.0.0
+      LLAMA_ARG_PORT: "8080"
+    command:
+      - "--embedding"
+      - "-hf"
+      - "${EMBEDDING_GEMMA_HF_REPO:-ggml-org/embeddinggemma-2-GGUF:Q8_0}"
+      - "--threads"
+      - "${EMBEDDING_GEMMA_THREADS:--1}"
+      - "--image-max-tokens"
+      - "${EMBEDDING_GEMMA_IMAGE_MAX_TOKENS:-70}"
+      # Embeddings need the whole input in one micro-batch: 2048 tokens covers long
+      # documents and any image at the token cap above.
+      - "--ctx-size"
+      - "8192"
+      - "--parallel"
+      - "2"
+      - "--batch-size"
+      - "2048"
+      - "--ubatch-size"
+      - "2048"
+      - "--no-webui"
+    healthcheck:
+      # /health is 503 while the model downloads and loads, the app waits for it.
+      test: ["CMD", "curl", "-sf", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 6
+      # First boot downloads ~0.9 GB: failures don't count during this window.
+      start_period: 30m

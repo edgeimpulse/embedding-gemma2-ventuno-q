@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EmbeddingGemma 2 · VENTUNO Q</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div>
+    <h1>EmbeddingGemma 2 <span class="muted">on VENTUNO Q</span></h1>
+    <p class="muted">Multimodal embeddings on the board, connected to Edge Impulse.</p>
+  </div>
+  <div id="status" class="pill">Connecting…</div>
+</header>
+
+<main>
+  <section class="card" id="live-card">
+    <div class="card-h">
+      <h2>Live classification</h2>
+      <label class="switch"><input type="checkbox" id="live" checked> Live</label>
+    </div>
+    <div class="cam-wrap">
+      <img id="cam" alt="Live camera feed from the board">
+      <div id="nocam" class="muted" hidden>No camera. Drop or choose an image to classify.</div>
+    </div>
+    <div class="row">
+      <input type="file" id="file" accept="image/*">
+      <span class="muted" id="latency"></span>
+    </div>
+    <ol id="results" class="bars"></ol>
+  </section>
+
+  <section class="card">
+    <h2>Labels</h2>
+    <p class="muted">Zero-shot labels from text. Add examples from the camera to teach a label by sight.</p>
+    <label>Labels (comma separated)<input id="labels" type="text"></label>
+    <label>Prompt template<input id="prompt" type="text" placeholder="a photo of {}"></label>
+    <div class="row">
+      <button id="save-labels">Apply</button>
+      <button id="clear-ex" class="secondary">Clear examples</button>
+    </div>
+    <div class="row">
+      <select id="ex-label"></select>
+      <button id="add-ex" class="secondary">Add current frame as example</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Edge Impulse project</h2>
+    <div id="ei-disconnected">
+      <p class="muted">Paste a project API key (Studio › Dashboard › Keys). Or set the EI_API_KEY secret of the Edge Impulse brick in App Lab.</p>
+      <label>API key<input id="ei-key" type="password" autocomplete="off" placeholder="ei_…"></label>
+      <button id="ei-connect">Connect</button>
+    </div>
+    <div id="ei-connected" hidden>
+      <p><a id="ei-link" target="_blank" rel="noopener"></a> <span class="muted" id="ei-labels"></span></p>
+      <h3>Collect</h3>
+      <div class="row">
+        <input id="up-label" type="text" placeholder="label (blank: top prediction)">
+        <select id="up-cat"><option>training</option><option>testing</option></select>
+        <button id="upload">Upload current frame</button>
+      </div>
+      <h3>Index and curate</h3>
+      <div class="row">
+        <button id="index">Embed project images</button>
+        <button id="learn" class="secondary">Use project as examples</button>
+        <button id="curate" class="secondary">Find label issues</button>
+      </div>
+      <progress id="index-progress" value="0" max="1" hidden></progress>
+      <span class="muted" id="index-status"></span>
+      <h3>Search</h3>
+      <div class="row">
+        <input id="q" type="text" placeholder="text query, blank: camera frame">
+        <button id="search">Search</button>
+      </div>
+    </div>
+    <div id="toast" class="muted"></div>
+  </section>
+
+  <section class="card wide" id="out-card" hidden>
+    <h2 id="out-title"></h2>
+    <div id="out" class="grid"></div>
+  </section>
+</main>
+
+<script src="libs/socket.io.min.js"></script>
+<script src="libs/arduino.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

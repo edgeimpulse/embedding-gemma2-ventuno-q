@@ -1,0 +1,57 @@
+package orchestrator
+
+import (
+	"fmt"
+	"os"
+	"testing"
+
+	"github.com/arduino/go-paths-helper"
+	"github.com/compose-spec/compose-go/v2/types"
+	"github.com/stretchr/testify/require"
+
+	"github.com/arduino/arduino-app-cli/internal/orchestrator/app"
+	"github.com/arduino/arduino-app-cli/internal/orchestrator/bricksindex"
+	"github.com/arduino/arduino-app-cli/internal/orchestrator/modelsindex"
+	"github.com/arduino/arduino-app-cli/internal/orchestrator/servicesindex"
+	"github.com/arduino/arduino-app-cli/internal/platform"
+	"github.com/arduino/arduino-app-cli/internal/orchestrator/config"
+)
+
+func TestEG2App(t *testing.T) {
+	cfg := setTestOrchestratorConfig(t)
+	src := paths.New(os.Getenv("EG2_APP"))
+	dst := paths.New(t.TempDir()).Join("eg2")
+	require.NoError(t, src.CopyDirTo(dst))
+	require.NoError(t, cfg.AssetDir().Join("bricks-list.yaml").WriteFile([]byte(`
+bricks:
+- id: arduino:web_ui
+  name: WebUI
+  category: ui
+  requires_display: webview
+  ports: [7000]
+`)))
+	require.NoError(t, cfg.AssetDir().Join("services").MkdirAll())
+	require.NoError(t, cfg.AssetDir().Join("models-list.yaml").WriteFile([]byte("models: []\n")))
+	a, err := app.Load(dst)
+	require.NoError(t, err)
+	for _, b := range a.LocalBricks {
+		fmt.Println("local brick:", b.ID, b.Name, len(b.Variables), "vars")
+	}
+	require.NoError(t, a.ProvisioningStateDir().MkdirAll())
+	servicesIndex, err := servicesindex.Load(platform.GetPlatform(nil), cfg.AssetDir().Join("services"))
+	require.NoError(t, err)
+	bi, err := bricksindex.Load(platform.GetPlatform(nil), cfg.AssetDir())
+	require.NoError(t, err)
+	mi, err := modelsindex.Load(platform.GetPlatform(nil), cfg.AssetDir(), cfg.ModelsDir(), cfg.CustomModelsDir(), nil, config.Configuration{})
+	require.NoError(t, err)
+	bi = bi.WithAppBricks(a.LocalBricks)
+	fmt.Println("secrets:", a.Secrets(bi))
+	env := appEnvironment(t.Context(), a, bi, mi, platform.Platform{})
+	require.NoError(t, generateComposeTemplate(&a, a.ProvisioningStateDir(), bi, servicesIndex, "python-apps-base:0.13.1", cfg, env, unkownPlatform))
+	henv := hostEnvironment(t.Context(), a.FullPath, cfg).Merge(env)
+	prj, err := renderComposeFile(t.Context(), &a, henv, types.Mapping{"EI_API_KEY": "ei_SECRET"}, "eg2")
+	require.NoError(t, err)
+	out, _ := a.AppComposeFilePath().ReadFile()
+	fmt.Println(string(out))
+	_ = prj
+}
