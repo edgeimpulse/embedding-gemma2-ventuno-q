@@ -16,7 +16,7 @@ DRAFT. Not reviewed or approved. See the Review list at the end before publishin
 | Publish date | [TBD] |
 | Post type | Technical deep dive with a getting-started section |
 
-**Feature image brief:** The Arduino VENTUNO Q board next to a screenshot of the app's live classification card, with the Edge Impulse and Arduino logos on the Edge Impulse brand background. Use the official logo files only. Alt text: "An Arduino VENTUNO Q board beside a screen showing a cracked egg classified with 97% confidence."
+**Feature image:** `images/embeddinggemma2-ventuno-q-feature.png` (1920 × 1080 PNG). Blue-to-turquoise brand gradient, the headline "Zero-Shot Labels on VENTUNO Q" in Montserrat ExtraBold, a tilted card cropped from the app's live classification screenshot, and the Edge Impulse primary logo at the bottom center. Alt text: "The app's live classification card showing a cracked egg scored 97% for cracked and 3% for intact."
 
 ---
 
@@ -68,7 +68,7 @@ Connect a project by pasting a project API key (**Dashboard > Keys** in Studio) 
 
 **Update embeddings** embeds every image in the project. **Find label issues** then flags unlabeled samples and samples whose label disagrees with their neighbors.
 
-On the Eggs AI project we used for testing, the app embedded 108 images (47 cracked, 49 intact, and 12 that carried the label `testing`) and flagged those 12. Each one comes with a suggested label, a margin, and a **Relabel** button that writes the change back to the project.
+On the [Eggs AI project](https://studio.edgeimpulse.com/public/20687/latest) we used for testing, the app embedded 108 images (47 cracked, 49 intact, and 12 that carried the label `testing`) and flagged those 12. Each one comes with a suggested label, a margin, and a **Relabel** button that writes the change back to the project.
 
 ![A grid of 12 egg images flagged as label issues, each with a suggested label and a Relabel button](../docs/images/curate.png)
 Twelve of 108 samples flagged. The margin shows how clearly one label beats the next.
@@ -102,12 +102,12 @@ The prompt template added 37 points to the same labels. A few examples then clos
 - **Small test.** This is one project with 27 test images. Treat the numbers as indicative, not as a benchmark.
 - **A data tool, not a deployment.** An embedding model is larger than the compact model you'd ship. Use it to get to a good dataset faster, then train a model sized for your target.
 - **Prompts are fragile.** Label names alone scored 51.9%. Test your prompt template before you trust the scores.
-- **Writes to your project.** Upload and relabel change the project in Studio. Use a test project or a clone while you try it.
+- **Writes to your project.** Upload and relabel change the project in Studio. Clone the [public Eggs AI project](https://studio.edgeimpulse.com/public/20687/latest) into your account to try it safely.
 - **Latency.** [TBD: measured per-frame embedding time on the VENTUNO Q. The repo's figure of about 50 ms was measured on a development machine, not on the board, so we don't state it here.]
 
 ## Try it yourself
 
-You need an Arduino VENTUNO Q set up with Arduino App Lab, a camera (optional), and an Edge Impulse project with an image dataset.
+You need an Arduino VENTUNO Q set up with Arduino App Lab, a camera (optional), and an Edge Impulse project with an image dataset. No dataset yet? Clone the [public Eggs AI project](https://studio.edgeimpulse.com/public/20687/latest), which has 108 images labeled `cracked` and `intact`, and follow along with the same data.
 
 1. Copy the `app/` folder to the board as an App Lab app, or open it in App Lab.
 2. Start the app. Wait for the status pill to read **Ready · 768-d**.
@@ -122,7 +122,7 @@ Source: [github.com/edgeimpulse/embedding-gemma2-ventuno-q](https://github.com/e
 
 The loop in this post has three parts: an Arduino board, an Edge Impulse project, and the code that connects them. Here is how to start on each.
 
-- **Create a free Edge Impulse account.** [Sign up for a free Developer plan account](https://studio.edgeimpulse.com/signup) and start building.
+- **Create a free Edge Impulse account.** [Sign up for a free Developer plan account](https://studio.edgeimpulse.com/signup?utm_medium=outbound&utm_source=blogpost&utm_campaign=54947365-new-user-acquisition_fall2026&utm_content=google-embedding-blogpost) and start building.
 - **Create an Arduino account.** [Sign up at Arduino](https://login.arduino.cc/login) to use Arduino App Lab, and use the same email address as your Edge Impulse account so your models show up in App Lab.
 - **Install the Edge Impulse agent skills.** If you build with a coding agent, the [Edge Impulse Agent Skills](https://github.com/edgeimpulse/agent-tools) teach it how to work with Edge Impulse. Install the whole catalog in one command:
 
@@ -154,8 +154,8 @@ Type your labels, point the camera, and classify on the Arduino VENTUNO Q with E
 | Repo is public and license (MPL-2.0 in repo, README says "Internal repo. Not reviewed for public release.") | README.md | Open source review (ei-review-osr), legal | Pending |
 | Accuracy table (51.9%, 88.9%, 96.3%, 100%) on 27 test images | README.md, `tools/eval_ei_project.py` | Product or applied research | Pending |
 | Per-frame latency on the VENTUNO Q | Not measured on board | Engineering | Missing |
-| Screenshots show project "Eggs AI - Jenny (#1132984)". Confirm the project name and ID can be public | docs/images/curate.png, classify.png | Jenny Speelman | Pending |
+| Screenshots show the working copy "Eggs AI - Jenny (#1132984)". The post links the public project (ID 20687). Confirm the public project matches the data in the results table, and that the working copy's name and ID can show | docs/images/curate.png, classify.png | Jenny Speelman | Pending |
 | VENTUNO Q description and Arduino/Qualcomm trademarks | docs.arduino.cc | Arduino, brand | Pending |
 | Third-party model: Google EmbeddingGemma 2 (Gemma terms of use) | Hugging Face model card | Legal | Pending |
-| Campaign ID for tracked signup link | Marketing | Marketing | Pending |
-| Feature image and logos | Brand assets | Design | Pending |
+| Tracked signup link (campaign 54947365-new-user-acquisition_fall2026) | Provided by author | Marketing | Pending |
+| Feature image (built from the repo screenshot with the official Edge Impulse logo file) | `blog/images/` | Design | Pending |
