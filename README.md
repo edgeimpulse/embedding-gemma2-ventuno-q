@@ -6,6 +6,25 @@ An [Arduino App Lab](https://docs.arduino.cc/software/app-lab/) app that runs Go
 
 ![Zero-shot and few-shot classification of an egg image](docs/images/classify.png)
 
+## Why
+
+Classic edge AI needs a labelled dataset and a training run before a model can tell two things apart. That is slow when you are still deciding what to detect, and the dataset itself is often the weak point: unlabelled samples, wrong labels, and no easy way to find an example of a case.
+
+A multimodal embedding model removes much of that. It needs no training run to start, so you can type labels and get a working classifier. The same vectors help clean up the dataset you build next. This app shows that loop on a small board: bootstrap with text, collect camera data into Edge Impulse, find the label problems, then train a compact production model in Studio. The embedding model is a data tool here. It does not replace the model you deploy.
+
+## What EmbeddingGemma 2 does
+
+EmbeddingGemma 2 turns text or an image into a 768-number vector. Similar meaning gives nearby vectors, and text and images share one space, so a photo can be compared directly with a phrase.
+
+The app uses that in four ways:
+
+1. **Embed.** A llama.cpp container (`llama-server --embedding`) serves the Q8_0 GGUF model on the board CPU. The brick sends text to `/v1/embeddings` and images to `/embeddings`, capped at 70 vision tokens per image. Vectors are L2-normalized, so a dot product is cosine similarity.
+2. **Zero-shot.** Each label becomes a text vector (for example `a photo of a cracked egg`). A frame is scored against every label vector and the scores go through a softmax.
+3. **Few-shot.** Labelled images are averaged into one image vector per label. The final score blends 30% text and 70% image vector, so a few examples correct a weak prompt.
+4. **Dataset checks.** Every project image is embedded once and cached. Search ranks the cache by similarity to a query. Label checks compare each sample with the other samples of each label (leaving itself out) and flag any whose label disagrees with its nearest group by a clear margin.
+
+Matryoshka output sizes (512, 256, 128) are supported by truncating and re-normalizing the vector.
+
 ## What it does
 
 | Feature | How it works |
