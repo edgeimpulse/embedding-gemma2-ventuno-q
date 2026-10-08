@@ -20,17 +20,17 @@ DRAFT. Not reviewed or approved. See the Review list at the end before publishin
 
 ---
 
-# Zero-Shot Labels and Dataset Cleanup on Arduino VENTUNO Q With EmbeddingGemma 2
+# Zero-Shot Labels and Dataset Cleanup on Arduino VENTUNO Q with EmbeddingGemma 2
 
-The slow part of a new vision project is often the start. Before a model can tell two things apart, you need a labeled dataset, and you usually don't know yet which labels you need. Then the dataset turns out to have unlabeled samples and wrong labels, and you find out after a training run.
+The slowest part of a new computer vision project is often the start. Before your model can tell two things apart, you need a labeled dataset, and you usually don't know yet which labels you need. Then the dataset turns out to have unlabeled samples and wrong labels, and you don't find out until after a training run.
 
-We built an Arduino App Lab app that moves some of that work to the front. It runs Google EmbeddingGemma 2 on the Arduino VENTUNO Q, so you can type a few labels, point a camera at something, and get a classifier with no training run. It connects to an Edge Impulse project, so the same embeddings also help you collect data, find label problems, and relabel samples. Edge Impulse Studio then turns that clean dataset into a compact model built for your target. EmbeddingGemma 2 gets you to good data faster, and the model you train in Studio is the one you deploy.
+An [Arduino App Lab](https://docs.edgeimpulse.com/hardware/deployments/run-arduino-app-lab) app can move some of that work to the front. [EmbeddingGemma 2 Vision Lab](https://github.com/edgeimpulse/embedding-gemma2-ventuno-q) runs Google's [EmbeddingGemma 2](https://ai.google.dev/gemma/docs/embeddinggemma/model_card_2) on the Arduino VENTUNO Q, so you can type a few labels, point a camera at something, and get a classifier with no training run. It connects to an Edge Impulse project, so the same embeddings also help you collect data, find label problems, and relabel samples. Edge Impulse Studio then turns that clean dataset into a compact model built for your target. EmbeddingGemma 2 gets you to good data faster, and the model you train in Studio is the one you deploy.
 
 ## What an embedding model gives you
 
 EmbeddingGemma 2 turns text or an image into a vector of 768 numbers. Similar meaning gives nearby vectors. Text and images share one space, so you can compare a photo directly with a phrase such as "a photo of a cracked egg."
 
-That one property supports four jobs in the app:
+Comparing vectors like this powers every feature in the app:
 
 1. **Zero-shot classification.** Each label becomes a text vector. A camera frame is embedded and scored against every label vector, and the scores go through a softmax.
 2. **Few-shot classification.** You add labeled frames as examples. The app averages them into one image vector per label and blends it with the text vector (30% text, 70% image), so a few examples correct a weak prompt.
@@ -39,7 +39,7 @@ That one property supports four jobs in the app:
 
 ## How it runs on the VENTUNO Q
 
-The [Arduino VENTUNO Q](https://docs.arduino.cc/hardware/ventuno-q/) pairs a Qualcomm Dragonwing IQ8 processor running Ubuntu with an STM32H5F5 microcontroller. Arduino App Lab combines sketches, Python, and AI models into apps that run on the board, and this project is one of those apps.
+The [Arduino VENTUNO Q](https://docs.arduino.cc/hardware/ventuno-q/) pairs a Qualcomm Dragonwing IQ8 processor running Ubuntu with an STM32H5F5 microcontroller. [Arduino App Lab](https://docs.edgeimpulse.com/hardware/deployments/run-arduino-app-lab) combines sketches, Python, and AI models into apps that run on the board. App Lab also connects to Edge Impulse, so models you train in Studio show up in your App Lab bricks.
 
 The app uses three bricks from `app.yaml`:
 
@@ -58,7 +58,7 @@ Type your labels in the app, set a prompt template such as `a photo of a {} egg`
 ![The app's live classification card showing a cracked egg scored at 97% for "cracked" and 3% for "intact"](../docs/images/classify.png)
 Zero-shot and few-shot classification of an egg image. The label rows show the number of examples behind each label.
 
-The prompt matters more than you might expect. On our test project, the same two labels scored very differently with and without a one-line prompt (see the results below).
+The template matters. A bare word like "cracked" says little about what an image looks like, but "a photo of a cracked egg" reads like a caption for one. On the egg test set, classifying with the bare label names was right 51.9% of the time. Adding the template `a photo of a {} egg` raised that to 88.9%. See the results below for the full comparison.
 
 ### 2. Collect into Edge Impulse
 
@@ -68,12 +68,12 @@ Connect a project by pasting a project API key (**Dashboard > Keys** in Studio) 
 
 **Update embeddings** embeds every image in the project. **Find label issues** then flags unlabeled samples and samples whose label disagrees with their neighbors.
 
-On the [Eggs AI project](https://studio.edgeimpulse.com/public/20687/latest) we used for testing, the app embedded 108 images (47 cracked, 49 intact, and 12 that carried the label `testing`) and flagged those 12. Each one comes with a suggested label, a margin, and a **Relabel** button that writes the change back to the project.
+On the [Eggs AI project](https://studio.edgeimpulse.com/public/20687/latest), the app embedded 108 images (47 cracked, 49 intact, and 12 that carried the label `testing`) and flagged those 12. Each one comes with a suggested label, a margin, and a **Relabel** button that writes the change back to the project.
 
 ![A grid of 12 egg images flagged as label issues, each with a suggested label and a Relabel button](../docs/images/curate.png)
 Twelve of 108 samples flagged. The margin shows how clearly one label beats the next.
 
-Treat the suggestions as a review queue, not an answer. In our run, the last thumbnail in the grid isn't an egg at all, and the suggestion for it ("intact") is wrong. Low margins are the ones to check by eye. The app ignores mismatches below a margin of 0.01, because below that they were mostly noise on test data.
+Treat the suggestions as a review queue, not an answer. In this run, the last thumbnail in the grid isn't an egg at all, and the suggestion for it ("intact") is wrong. Low margins are the ones to check by eye. The app ignores mismatches below a margin of 0.01, because below that they were mostly noise on test data.
 
 The same index powers search, so you can type "a cracked egg" and see the closest project images.
 
@@ -82,11 +82,11 @@ Text search over the project's images.
 
 ### 4. Train the model you deploy
 
-When the dataset is clean, go back to Studio. [create an impulse](https://docs.edgeimpulse.com/studio/projects/impulse-design), train, and deploy as usual. You can run the result on the VENTUNO Q through Arduino App Lab, or with `edge-impulse-linux-runner`, which uses hardware acceleration on the Hexagon NPU. See the [VENTUNO Q guide](https://docs.edgeimpulse.com/hardware/boards/arduino-ventuno-q) and [Run Arduino App Lab](https://docs.edgeimpulse.com/hardware/deployments/run-arduino-app-lab) in the docs.
+When the labels are fixed, go back to Studio and retrain your existing impulse on the corrected dataset. If the project is new and has no impulse yet, create one first. Then deploy the model. You can run the result on the VENTUNO Q through App Lab, or with `edge-impulse-linux-runner`, which uses hardware acceleration on the Hexagon NPU. See the [VENTUNO Q guide](https://docs.edgeimpulse.com/hardware/boards/arduino-ventuno-q) and [Run Arduino App Lab](https://docs.edgeimpulse.com/hardware/deployments/run-arduino-app-lab) in the docs.
 
 ## Results on the Eggs AI project
 
-We checked the approach with `tools/eval_ei_project.py`. It scores cached embeddings for 69 training images and 27 testing images labeled `cracked` or `intact`. The 12 samples labeled `testing` are skipped.
+I checked the approach with `tools/eval_ei_project.py`. It scores cached embeddings for 69 training images and 27 testing images labeled `cracked` or `intact`. The 12 samples labeled `testing` are skipped.
 
 | Method | Accuracy |
 | --- | --- |
@@ -95,7 +95,7 @@ We checked the approach with `tools/eval_ei_project.py`. It scores cached embedd
 | Few-shot (training prototypes plus text) | 96.3% |
 | 1-NN (nearest training image) | 100% |
 
-The prompt template added 37 points to the same labels. A few examples then closed most of the remaining gap.
+Wrapping the label names in a prompt (`a photo of a {} egg`) took zero-shot accuracy from 51.9% to 88.9%. Adding labeled training images as examples raised it to 96.3%.
 
 ## Limitations
 
@@ -103,34 +103,31 @@ The prompt template added 37 points to the same labels. A few examples then clos
 - **A data tool, not a deployment.** An embedding model is larger than the compact model you'd ship. Use it to get to a good dataset faster, then train a model sized for your target.
 - **Prompts are fragile.** Label names alone scored 51.9%. Test your prompt template before you trust the scores.
 - **Writes to your project.** Upload and relabel change the project in Studio. Clone the [public Eggs AI project](https://studio.edgeimpulse.com/public/20687/latest) into your account to try it safely.
-- **Latency.** [TBD: measured per-frame embedding time on the VENTUNO Q. The repo's figure of about 50 ms was measured on a development machine, not on the board, so we don't state it here.]
+- **Latency.** [TBD: measured per-frame embedding time on the VENTUNO Q. The repo's figure of about 50 ms was measured on a development machine, not on the board, so the figure is left out.]
 
 ## Try it yourself
 
-You need an Arduino VENTUNO Q set up with Arduino App Lab, a camera (optional), and an Edge Impulse project with an image dataset. No dataset yet? Clone the [public Eggs AI project](https://studio.edgeimpulse.com/public/20687/latest), which has 108 images labeled `cracked` and `intact`, and follow along with the same data.
+You need an Arduino VENTUNO Q set up with Arduino App Lab, a camera (optional), and an Edge Impulse project with an image dataset. No dataset yet? Clone the [public Eggs AI project](https://studio.edgeimpulse.com/public/20687/latest), which has 108 images labeled `cracked` and `intact`.
 
-1. Copy the `app/` folder to the board as an App Lab app, or open it in App Lab.
+1. Clone the [GitHub repo](https://github.com/edgeimpulse/embedding-gemma2-ventuno-q) and copy the `app/` folder to the board as an App Lab app, or open it in App Lab.
 2. Start the app. Wait for the status pill to read **Ready · 768-d**.
 3. Connect your Edge Impulse project with an API key.
 4. Enter your labels, apply a prompt template, and watch the live card.
 5. Run **Update embeddings**, then **Find label issues**, and review the suggestions.
-6. Train and deploy your compact model in Studio.
+6. Retrain your impulse in Studio on the corrected labels, then deploy the model.
 
-Source: [github.com/edgeimpulse/embedding-gemma2-ventuno-q](https://github.com/edgeimpulse/embedding-gemma2-ventuno-q) [TBD: confirm the repo is public and the license before linking].
+The full source is on GitHub at [edgeimpulse/embedding-gemma2-ventuno-q](https://github.com/edgeimpulse/embedding-gemma2-ventuno-q).
 
 ## Get started
 
-The loop in this post has three parts: an Arduino board, an Edge Impulse project, and the code that connects them. Here is how to start on each.
+Two accounts get you started: Edge Impulse and Arduino.
 
 - **Create a free Edge Impulse account.** [Sign up for a free Developer plan account](https://studio.edgeimpulse.com/signup?utm_medium=outbound&utm_source=blogpost&utm_campaign=54947365-new-user-acquisition_fall2026&utm_content=google-embedding-blogpost) and start building.
 - **Create an Arduino account.** [Sign up at Arduino](https://login.arduino.cc/login) to use Arduino App Lab, and use the same email address as your Edge Impulse account so your models show up in App Lab.
-- **Install the Edge Impulse agent skills.** If you build with a coding agent, the [Edge Impulse Agent Skills](https://github.com/edgeimpulse/agent-tools) teach it how to work with Edge Impulse. Install the whole catalog in one command:
 
-  ```bash
-  npx skills add edgeimpulse/agent-tools --all
-  ```
+## Build your own with an AI agent
 
-  That adds every skill to each coding agent it detects, including `ei-build-arduino-uno-q-app-lab` for App Lab apps, bricks, model integration, and Flask UIs, and `ei-api` for the Studio and Ingestion APIs. Some skills in the catalog are experimental and may change. To see what's available before you install, run `npx skills add edgeimpulse/agent-tools --list`.
+You don't have to write an app like this by hand. Point your coding agent at the Edge Impulse agent skills and describe what you want: an Arduino App Lab app with a camera, a model, and a web UI that reads and writes your Edge Impulse project. The skills give the agent the context it needs for App Lab bricks, EIM model integration, and the Studio and Ingestion APIs, so it can scaffold the app and wire it to your project. You review the result and adjust it to your own labels and data.
 
 Join us in the [Edge Impulse forum](https://forum.edgeimpulse.com/), our [Discord server](https://discord.gg/edgeimpulse), or tag us on social media. We'd love to see what you're building.
 
@@ -139,7 +136,7 @@ Join us in the [Edge Impulse forum](https://forum.edgeimpulse.com/), our [Discor
 ## Promotion kit
 
 **LinkedIn** (under 700 characters, one link, two or three hashtags):
-Starting a vision project usually means labeling data before you know which labels you need. We built an Arduino App Lab app that runs EmbeddingGemma 2 on the Arduino VENTUNO Q so you can type labels, point a camera, and classify with no training run. The same embeddings help you find label mistakes in your Edge Impulse dataset before you train the model you deploy. Code, screenshots, and results on a small egg-inspection project: [link] #EdgeAI #Arduino #ComputerVision
+Starting a vision project usually means labeling data before you know which labels you need. This Arduino App Lab app runs EmbeddingGemma 2 on the Arduino VENTUNO Q so you can type labels, point a camera, and classify with no training run. The same embeddings help you find label mistakes in your Edge Impulse dataset before you train the model you deploy. Code, screenshots, and results on a small egg-inspection project: [link] #EdgeAI #Arduino #ComputerVision
 
 **X or Bluesky** (under 280 characters):
 Classify camera frames on the Arduino VENTUNO Q from label names alone, then use the same EmbeddingGemma 2 embeddings to find label issues in your Edge Impulse dataset. Walkthrough and code: [link]
@@ -151,11 +148,12 @@ Type your labels, point the camera, and classify on the Arduino VENTUNO Q with E
 
 | Item | Source | Approver | Status |
 | --- | --- | --- | --- |
-| Repo is public and license (MPL-2.0 in repo, README says "Internal repo. Not reviewed for public release.") | README.md | Open source review (ei-review-osr), legal | Pending |
+| Repo is public by the publish date. Remove "Internal repo. Not reviewed for public release." from the README first, and finish the open source review | README.md | Open source review (ei-review-osr), legal | Pending |
 | Accuracy table (51.9%, 88.9%, 96.3%, 100%) on 27 test images | README.md, `tools/eval_ei_project.py` | Product or applied research | Pending |
 | Per-frame latency on the VENTUNO Q | Not measured on board | Engineering | Missing |
 | Screenshots show the working copy "Eggs AI - Jenny (#1132984)". The post links the public project (ID 20687). Confirm the public project matches the data in the results table, and that the working copy's name and ID can show | docs/images/curate.png, classify.png | Jenny Speelman | Pending |
 | VENTUNO Q description and Arduino/Qualcomm trademarks | docs.arduino.cc | Arduino, brand | Pending |
-| Third-party model: Google EmbeddingGemma 2 (Gemma terms of use) | Hugging Face model card | Legal | Pending |
+| Agent skills link: add the public link to the Edge Impulse agent skills in "Build your own with an AI agent" once it exists | Blog post | DevRel | Pending |
+| Third-party model: Google EmbeddingGemma 2 (Apache 2.0 license; the model card also says deployments must follow the Gemma Prohibited Use Policy) | [Model card](https://ai.google.dev/gemma/docs/embeddinggemma/model_card_2), [Hugging Face](https://huggingface.co/google/embeddinggemma-2) | Legal | Pending |
 | Tracked signup link (campaign 54947365-new-user-acquisition_fall2026) | Provided by author | Marketing | Pending |
 | Feature image (built from the repo screenshot with the official Edge Impulse logo file) | `blog/images/` | Design | Pending |
