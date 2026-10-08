@@ -12,7 +12,7 @@ DRAFT. Not reviewed or approved. See the Review list at the end before publishin
 | Meta description | Run EmbeddingGemma 2 in an Arduino App Lab app on VENTUNO Q to classify camera frames from label names, find label issues, and train a compact model. |
 | Primary tag | edge ai |
 | Secondary tags | Computer Vision, Projects, arduino |
-| Author | [TBD: author name] |
+| Author | Jenny Speelman |
 | Publish date | [TBD] |
 | Post type | Technical deep dive with a getting-started section |
 
@@ -124,13 +124,13 @@ The loop in this post has three parts: an Arduino board, an Edge Impulse project
 
 - **Create a free Edge Impulse account.** [Sign up for a free Developer plan account](https://studio.edgeimpulse.com/signup) and start building.
 - **Create an Arduino account.** [Sign up at Arduino](https://login.arduino.cc/login) to use Arduino App Lab, and use the same email address as your Edge Impulse account so your models show up in App Lab.
-- **Install the Edge Impulse agent skills.** If you build with a coding agent, the [Edge Impulse Agent Skills](https://github.com/edgeimpulse/agent-tools) teach it how to work with Edge Impulse. For apps like this one, start with `ei-build-arduino-uno-q-app-lab`, which covers App Lab apps, bricks, model integration, and Flask UIs:
+- **Install the Edge Impulse agent skills.** If you build with a coding agent, the [Edge Impulse Agent Skills](https://github.com/edgeimpulse/agent-tools) teach it how to work with Edge Impulse. Install the whole catalog in one command:
 
   ```bash
-  npx skills add edgeimpulse/agent-tools --skill ei-build-arduino-uno-q-app-lab
+  npx skills add edgeimpulse/agent-tools --all
   ```
 
-  Add `ei-api` for the Studio and Ingestion APIs. To see the full catalog first, run `npx skills add edgeimpulse/agent-tools --list`.
+  That adds every skill to each coding agent it detects, including `ei-build-arduino-uno-q-app-lab` for App Lab apps, bricks, model integration, and Flask UIs, and `ei-api` for the Studio and Ingestion APIs. Some skills in the catalog are experimental and may change. To see what's available before you install, run `npx skills add edgeimpulse/agent-tools --list`.
 
 Join us in the [Edge Impulse forum](https://forum.edgeimpulse.com/), our [Discord server](https://discord.gg/edgeimpulse), or tag us on social media. We'd love to see what you're building.
 
@@ -154,7 +154,7 @@ Type your labels, point the camera, and classify on the Arduino VENTUNO Q with E
 | Repo is public and license (MPL-2.0 in repo, README says "Internal repo. Not reviewed for public release.") | README.md | Open source review (ei-review-osr), legal | Pending |
 | Accuracy table (51.9%, 88.9%, 96.3%, 100%) on 27 test images | README.md, `tools/eval_ei_project.py` | Product or applied research | Pending |
 | Per-frame latency on the VENTUNO Q | Not measured on board | Engineering | Missing |
-| Screenshot shows project "Eggs AI - Jenny (#1132984)" and a user-named project | docs/images/curate.png, classify.png | Project owner | Pending |
+| Screenshots show project "Eggs AI - Jenny (#1132984)". Confirm the project name and ID can be public | docs/images/curate.png, classify.png | Jenny Speelman | Pending |
 | VENTUNO Q description and Arduino/Qualcomm trademarks | docs.arduino.cc | Arduino, brand | Pending |
 | Third-party model: Google EmbeddingGemma 2 (Gemma terms of use) | Hugging Face model card | Legal | Pending |
 | Campaign ID for tracked signup link | Marketing | Marketing | Pending |
