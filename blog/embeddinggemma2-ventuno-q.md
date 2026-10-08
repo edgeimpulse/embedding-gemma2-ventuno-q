@@ -24,7 +24,7 @@ DRAFT. Not reviewed or approved. See the Review list at the end before publishin
 
 The slow part of a new vision project is often the start. Before a model can tell two things apart, you need a labeled dataset, and you usually don't know yet which labels you need. Then the dataset turns out to have unlabeled samples and wrong labels, and you find out after a training run.
 
-We built an Arduino App Lab app that moves some of that work to the front. It runs Google EmbeddingGemma 2 on the Arduino VENTUNO Q, so you can type a few labels, point a camera at something, and get a classifier with no training run. It connects to an Edge Impulse project, so the same embeddings also help you collect data, find label problems, and relabel samples. You still train the model you deploy in Edge Impulse Studio. The embedding model is a data tool, not the deployed model.
+We built an Arduino App Lab app that moves some of that work to the front. It runs Google EmbeddingGemma 2 on the Arduino VENTUNO Q, so you can type a few labels, point a camera at something, and get a classifier with no training run. It connects to an Edge Impulse project, so the same embeddings also help you collect data, find label problems, and relabel samples. Edge Impulse Studio then turns that clean dataset into a compact model built for your target. EmbeddingGemma 2 gets you to good data faster, and the model you train in Studio is the one you deploy.
 
 ## What an embedding model gives you
 
